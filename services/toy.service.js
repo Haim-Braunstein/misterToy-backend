@@ -11,26 +11,29 @@ export const toyService = {
     remove
 }
 
-function query(filterBy, sort) {
-
+function query(filterBy,sortBy) {
     let filteredToys = toys
+
     if (filterBy.txt) {
-        const regExp = new RegExp(filterBy.txt, 'i')
-        filteredToys = filteredToys.filter(toy => regExp.test(toy.name))
+        const regex = new RegExp(filterBy.txt, 'i')
+        filteredToys = filteredToys.filter(toy => regex.test(toy.name))
     }
 
-    if (filterBy.inStock) {
-        filteredToys = filteredToys.filter(toy => toy.inStock === JSON.parse(filterBy.inStock))
+    if (filterBy.inStock !== 'all') {
+        filteredToys = filteredToys.filter(toy => {
+
+            return filterBy.inStock === 'in-stock' ? toy.inStock : !toy.inStock
+        })
     }
 
-    filterBy.maxPrice = (+filterBy.maxPrice) ? +filterBy.maxPrice : Infinity
 
-    filteredToys = filteredToys.filter(toy => (toy.price <= filterBy.maxPrice))
-
+    if (+filterBy.maxPrice !== 0) {
+        filteredToys = filteredToys.filter(toy => toy.price <= +filterBy.maxPrice)
+    }
     filteredToys.sort((toy1, toy2) => {
-        const dir = JSON.parse(sort.asc) ? 1 : -1
-        if (sort.by === 'price') return (toy1.price - toy2.price) * dir
-        if (sort.by === 'name') return toy1.name.localeCompare(toy2.name) * dir
+        const dir = JSON.parse(sortBy.asc) ? 1 : -1
+        if (sortBy.by === 'price') return (toy1.price - toy2.price) * dir
+        if (sortBy.by === 'name') return toy1.name.localeCompare(toy2.name) * dir
         // add date 
     })
 
@@ -39,7 +42,7 @@ function query(filterBy, sort) {
 
 function getById(_id) {
     const toy = toys.find(toy => toy._id === _id)
-    
+
     return Promise.resolve(toy);
 }
 

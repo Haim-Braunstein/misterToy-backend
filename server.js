@@ -26,19 +26,21 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 app.get('/api/toy', (req, res) => {
-    const { filterBy = {}, sort = {} } = req.query.params
-    console.log("req.query.params:", req.query.params)
+    const { filterBy, sortBy } = req.query.params
 
+    toyService.query(filterBy,sortBy)
 
-    toyService.query(filterBy, sort)
         .then(toys => {
+
             res.send(toys)
+
         })
         .catch(err => {
             console.log('Had issues getting toys', err);
             res.status(400).send({ msg: 'Had issues getting toys' })
         })
 })
+
 
 app.get('/api/toy/:id', (req, res) => {
     const toyId = req.params.id
